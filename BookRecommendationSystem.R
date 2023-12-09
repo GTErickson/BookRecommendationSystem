@@ -1,14 +1,14 @@
 # Original code for loading data frames
 getwd()
-setwd("C:/Users/gmone/475/Project")
+setwd("C:/Users/gmone/475/Project/BookRecommendationSystem")
 
 # Load packages
 library(tidyverse)
 
 # Load datasets
-books <- read.csv("BX_Book.csv", sep = ";", header = TRUE)
+books <- read.csv("BX_Books.csv", sep = ";", header = TRUE)
 ratings <- read.csv("BX-Book-Ratings.csv", sep = ";", header = TRUE)
-users <- read.csv("BX-Users1.csv", sep = ";", header = TRUE)
+users <- read.csv("BX-Users.csv", sep = ";", header = TRUE)
 
 #Clean book data
 books[c('ISBN', 'Book.Title','Book.Author', 'Year.Of.Publication', 'Publisher', 'Image.URL.S', 'Image.URL.M', 'Image.URL.L')] <- str_split_fixed(books$x, ';', 8)

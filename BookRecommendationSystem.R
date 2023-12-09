@@ -239,7 +239,7 @@ while (TRUE) {
   cat("6. Display top 10 average-ranked books based of of Location\n")
   cat("7. Quit\n")
   
-  choice <- as.numeric(readline(prompt = "Enter your choice (1-4): "))
+  choice <- as.numeric(readline(prompt = "Enter your choice (1-7): "))
   
   if (choice == 1) {
     display_top_books()

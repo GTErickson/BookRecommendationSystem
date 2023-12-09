@@ -8,37 +8,42 @@ library(stringr)
 
 
 # Load datasets
-books <- read.csv("BX_Books.csv", sep=";")
+books <- read.csv("BX_Book.csv", sep=";")
 ratings <- read.csv("BX-Book-Ratings.csv", sep = ";", header = TRUE)
-users <- read.csv("BX-Users.csv", sep = ";", header = TRUE)
-users1 <- read.csv("BX-Users1.csv", sep = ";", header = TRUE)
+users1 <- read.csv("BX-Users.csv", sep = ";", header = TRUE)
+users <- read.csv("BX-Users1.csv", sep = ";", header = TRUE)
 
-books[c('ISBN', 'Book.Title','Book.Author', 'Year.Of.Publication', 'Publisher', )] <- str_split_fixed(books$x, ',', 3)
+
+
+#Clean book data
+books[c('ISBN', 'Book.Title','Book.Author', 'Year.Of.Publication', 'Publisher', 'Image.URL.S', 'Image.URL.M', 'Image.URL.L')] <- str_split_fixed(books$x, ';', 8)
+books <- books[c('ISBN', 'Book.Title','Book.Author', 'Year.Of.Publication', 'Publisher', 'Image.URL.S', 'Image.URL.M', 'Image.URL.L')] 
+
+#Clean User data
+users$Age = users$Age........
+users <- users %>%
+  filter(!grepl("<",Location))
+users <- users %>%
+  filter(!grepl("<",Age))
+users <- users %>%
+  filter(!grepl("<",User.ID))
+users <- users %>%
+  filter(!grepl(";",Location))
+users <- users %>%
+  filter(!grepl(";",Age))
+users <- users %>%
+  filter(!grepl(";",User.ID))
+#Expand Location into city state and country
+users[c('City', 'State','Country')] <- str_split_fixed(users$Location, ',', 3)
 users <- users[c('User.ID','City','State','Country','Age')]
+users <- users %>%
+  filter(!grepl(";",Age))
 
-# Prompt user to create a profile
-cat("Welcome! Let's create your profile.\n")
-
-# Get user location
-cat("Enter your location details:\n")
-location <- readline(prompt = "Location (City, State, Country): ")
-
-# Get user age
-user_age <- as.numeric(readline(prompt = "Enter your age: "))
-
-# Create a new user profile with fixed ID 0
-new_user <- data.frame(User.ID = 0, Location = location, Age = user_age)
-
-# Insert the new user at the top of the users dataframe
-users <- rbind(new_user, users)
-
-# Display the updated users dataframe
-cat("\nUser Profile Created:\n")
-print(new_user)
-print(users)
+users$Age = substr(users$Age,1,2)
 
 # Data cleaning ratings data
 book_ratings <- ratings %>%
+  filter(User.ID %in% users$User.ID) %>%
   group_by(ISBN) %>%
   summarise(avg_rating = mean(Book.Rating)) %>%
   filter(ISBN %in% books$ISBN)
@@ -48,6 +53,12 @@ book_counts <- ratings %>%
   count()
 
 book_ratings <- left_join(book_ratings, book_counts, by="ISBN")
+book_ratings <- left_join(book_ratings, books, by="ISBN")
+
+book_ratings <- book_ratings %>% mutate(Book.Title = (gsub("\"", "", Book.Title)))
+
+
+print(book_ratings[, c("ISBN","Book.Title","avg_rating")])
 
 # Display the first few rows of the general rating data frame
 head(book_ratings)
@@ -68,19 +79,6 @@ user_ratings <- ratings %>%
 
 # Display the first few rows of user-specific ratings
 head(user_ratings)
-
-#Clean User data
-
-#Expand Location into city state and country
-users[c('City', 'State','Country')] <- str_split_fixed(users$Location, ',', 3)
-users <- users[c('User.ID','City','State','Country','Age')]
-
-#Clean Entries within users
-dirty <- users1 %>%
-  filter(grepl(";",Location))
-
-dirty <- books %>%
-  filter(grepl(";",Book.Title))
 
 #Age-based recommendation (User 218411)
 

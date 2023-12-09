@@ -6,13 +6,43 @@ setwd("C:/Users/gmone/475/Project")
 library(tidyverse)
 
 # Load datasets
-books <- read.csv("BX_Books.csv", sep = ";", header = TRUE)
+books <- read.csv("BX_Book.csv", sep = ";", header = TRUE)
 ratings <- read.csv("BX-Book-Ratings.csv", sep = ";", header = TRUE)
-users <- read.csv("BX-Users.csv", sep = ";", header = TRUE)
+users <- read.csv("BX-Users1.csv", sep = ";", header = TRUE)
 
-# Tidy Users dataframe
+#Clean book data
+books[c('ISBN', 'Book.Title','Book.Author', 'Year.Of.Publication', 'Publisher', 'Image.URL.S', 'Image.URL.M', 'Image.URL.L')] <- str_split_fixed(books$x, ';', 8)
+books <- books[c('ISBN', 'Book.Title','Book.Author', 'Year.Of.Publication', 'Publisher', 'Image.URL.S', 'Image.URL.M', 'Image.URL.L')] 
+
+books <- books %>% mutate(Book.Title = (gsub("\"", "", Book.Title)))
+books <- books %>% mutate(Book.Author = (gsub("\"", "", Book.Author)))
+books <- books %>% mutate(Year.Of.Publication = (gsub("\"", "", Year.Of.Publication)))
+books <- books %>% mutate(Publisher = (gsub("\"", "", Publisher)))
+books <- books %>% mutate(Image.URL.S = (gsub("\"", "", Image.URL.S)))
+books <- books %>% mutate(Image.URL.M = (gsub("\"", "", Image.URL.M)))
+books <- books %>% mutate(Image.URL.L = (gsub("\"", "", Image.URL.L)))
+
+#Clean User data
+users$Age <- users$Age........
+users <- users %>%
+  filter(!grepl("<",Location))
+users <- users %>%
+  filter(!grepl("<",Age))
+users <- users %>%
+  filter(!grepl("<",User.ID))
+users <- users %>%
+  filter(!grepl(";",Location))
+users <- users %>%
+  filter(!grepl(";",Age))
+users <- users %>%
+  filter(!grepl(";",User.ID))
+#Expand Location into city state and country
 users[c('City', 'State','Country')] <- str_split_fixed(users$Location, ',', 3)
 users <- users[c('User.ID','City','State','Country','Age')]
+users <- users %>%
+  filter(!grepl(";",Age))
+
+users$Age = substr(users$Age,1,2)
 
 # Function for user sign in capabilities
 user_sign_in <- function() {
@@ -96,6 +126,7 @@ display_top_books <- function() {
   
   # Data cleaning and processing for general ratings
   book_ratings <- ratings %>%
+    filter(User.ID %in% users$User.ID) %>%
     group_by(ISBN) %>%
     summarise(avg_rating = mean(Book.Rating),
               count = n()) %>%
@@ -106,10 +137,12 @@ display_top_books <- function() {
   top_books <- book_ratings %>%
     filter(count > 3)
   
+  top_books <- left_join(top_books, books, by="ISBN")
+  
   # Display the top 10 average-ranked books
   top_10_books <- head(top_books[order(top_books$avg_rating, decreasing = TRUE), ], 10)
   
-  print(top_10_books[, c("ISBN", "avg_rating")])
+  print(top_10_books[, c("ISBN","Book.Title","avg_rating")])
 }
 
 # Function to display top 10 average-ranked books with over 3 ratings based on age
@@ -141,6 +174,7 @@ display_top_books_by_Age <- function() {
   
   # Data cleaning and processing for general ratings
   book_ratings <- temp2 %>%
+    filter(User.ID %in% users$User.ID) %>%
     group_by(ISBN) %>%
     summarise(avg_rating = mean(Book.Rating),
               count = n()) %>%
@@ -151,10 +185,12 @@ display_top_books_by_Age <- function() {
   top_books <- book_ratings %>%
     filter(count > 3)
   
+  top_books <- left_join(top_books, books, by="ISBN")
+  
   # Display the top 10 average-ranked books
   top_10_books <- head(top_books[order(top_books$avg_rating, decreasing = TRUE), ], 10)
   
-  print(top_10_books[, c("ISBN", "avg_rating")])
+  print(top_10_books[, c("ISBN","Book.Title","avg_rating")])
 }
 
 # Function to display top 10 average-ranked books with over 3 ratings based on Location
@@ -172,6 +208,7 @@ display_top_books_by_Location <- function() {
   
   # Data cleaning and processing for general ratings
   book_ratings <- temp2 %>%
+    filter(User.ID %in% users$User.ID) %>%
     group_by(ISBN) %>%
     summarise(avg_rating = mean(Book.Rating),
               count = n()) %>%
@@ -182,10 +219,12 @@ display_top_books_by_Location <- function() {
   top_books <- book_ratings %>%
     filter(count > 3)
   
+  top_books <- left_join(top_books, books, by="ISBN")
+  
   # Display the top 10 average-ranked books
   top_10_books <- head(top_books[order(top_books$avg_rating, decreasing = TRUE), ], 10)
   
-  print(top_10_books[, c("ISBN", "avg_rating")])
+  print(top_10_books[, c("ISBN","Book.Title","avg_rating")])
 }
 
 # Menu-based interaction

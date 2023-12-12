@@ -49,8 +49,8 @@ book_ratings <- ratings %>%
   filter(ISBN %in% books$ISBN)
 
 book_counts <- ratings %>%
-  group_by(ISBN) %>%
-  count()
+  `group_by(ISBN) %>%
+  count()`
 
 book_ratings <- left_join(book_ratings, book_counts, by="ISBN")
 book_ratings <- left_join(book_ratings, books, by="ISBN")

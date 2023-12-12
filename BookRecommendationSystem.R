@@ -43,6 +43,7 @@ users <- users %>%
   filter(!grepl(";",Age))
 
 users$Age = substr(users$Age,1,2)
+users$Age = as.numeric(users$Age)
 
 # Function for user sign in capabilities
 user_sign_in <- function() {
@@ -150,47 +151,52 @@ display_top_books_by_Age <- function() {
   
   current_user <- users %>%
     filter(User.ID == user_id)
-  age <- as.numeric(current_user$Age)
+  age <- current_user$Age
   
-  temp1 <- users %>%
-    filter(!(Age == "NULL")) %>%
-    filter(!grepl("<",Age))
-  
-  upper <- temp1 %>%
-    filter(as.numeric(Age) <= (age + 5))
-  
-  lower <- temp1 %>%
-    filter(as.numeric(Age) >= (age - 5))
-  
-  temp1 <- inner_join(upper, lower, by="User.ID")
-  temp1$City = temp1$City.x
-  temp1$State = temp1$State.x
-  temp1$Country = temp1$Country.x
-  temp1$Age = temp1$Age.x
-  temp1 <- temp1[c('User.ID','City','State','Country','Age')]
-  
-  temp2 <- ratings %>%
-    filter(ratings$User.ID %in% temp1$User.ID)
-  
-  # Data cleaning and processing for general ratings
-  book_ratings <- temp2 %>%
-    filter(User.ID %in% users$User.ID) %>%
-    group_by(ISBN) %>%
-    summarise(avg_rating = mean(Book.Rating),
-              count = n()) %>%
-    filter(ISBN %in% books$ISBN)
-  
-  
-  # Filter for books with over 3 ratings
-  top_books <- book_ratings %>%
-    filter(count > 3)
-  
-  top_books <- left_join(top_books, books, by="ISBN")
-  
-  # Display the top 10 average-ranked books
-  top_10_books <- head(top_books[order(top_books$avg_rating, decreasing = TRUE), ], 10)
-  
-  print(top_10_books[, c("ISBN","Book.Title","avg_rating")])
+  if (is.na(age)){
+    cat("\nUser's age is not defined\n")
+    
+  }else{
+    temp1 <- users %>%
+      filter(!(Age == "NULL")) %>%
+      filter(!grepl("<",Age))
+    
+    upper <- temp1 %>%
+      filter(as.numeric(Age) <= (age + 5))
+    
+    lower <- temp1 %>%
+      filter(as.numeric(Age) >= (age - 5))
+    
+    temp1 <- inner_join(upper, lower, by="User.ID")
+    temp1$City = temp1$City.x
+    temp1$State = temp1$State.x
+    temp1$Country = temp1$Country.x
+    temp1$Age = temp1$Age.x
+    temp1 <- temp1[c('User.ID','City','State','Country','Age')]
+    
+    temp2 <- ratings %>%
+      filter(ratings$User.ID %in% temp1$User.ID)
+    
+    # Data cleaning and processing for general ratings
+    book_ratings <- temp2 %>%
+      filter(User.ID %in% users$User.ID) %>%
+      group_by(ISBN) %>%
+      summarise(avg_rating = mean(Book.Rating),
+                count = n()) %>%
+      filter(ISBN %in% books$ISBN)
+    
+    
+    # Filter for books with over 3 ratings
+    top_books <- book_ratings %>%
+      filter(count > 3)
+    
+    top_books <- left_join(top_books, books, by="ISBN")
+    
+    # Display the top 10 average-ranked books
+    top_10_books <- head(top_books[order(top_books$avg_rating, decreasing = TRUE), ], 10)
+    
+    print(top_10_books[, c("ISBN","Book.Title","avg_rating")])
+  }
 }
 
 # Function to display top 10 average-ranked books with over 3 ratings based on Location
@@ -244,11 +250,7 @@ while (TRUE) {
   if (choice == 1) {
     display_top_books()
   } else if (choice == 2) {
-    if (is.na(user_id)) {
       user_sign_in()
-    } else {
-      cat("\nAlready logged in!\n")
-    }
   }else if (choice == 3) {
     if (is.na(user_id)) {
       create_user_profile()
@@ -260,12 +262,20 @@ while (TRUE) {
     if (!is.na(user_id)) {
       add_book(user_id)
     } else {
-      cat("\nPlease create a user profile first!\n")
+      cat("\nPlease sign in first!\n")
     }
   } else if (choice == 5) {
-    display_top_books_by_Age()
+    if (!is.na(user_id)) {
+      display_top_books_by_Age()
+    } else {
+      cat("\nPlease sign in first!\n")
+    }
   } else if (choice == 6) {
-    display_top_books_by_Location()
+    if (!is.na(user_id)) {
+      display_top_books_by_Location()
+    } else {
+      cat("\nPlease sign in first!\n")
+    }
   }else if (choice == 7) {
     cat("\nExiting the system. Goodbye!\n")
     break

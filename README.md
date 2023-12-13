@@ -1,6 +1,6 @@
 # BookRecommendationSystem
 
-This repository stores the code for Team 19's Cpt_S 475 Data Science Final Project.
+This repository stores the code for Team 19's Cpt_S 475 Data Science Final Project (Fall 2023)
 
 The book recommendation system that we have created uses content-based filtering algorithms over the Book-Crossing Dataset to produce user-specific book recommendations.
 The project was done entirely in R. 

@@ -19,3 +19,6 @@ The files for the code are as follows:
 - PreliminaryTesting.R --> This file contains the EDA filtering methods that we used to get familiar with the dataset
 - DataVisualization.R --> This file contains the EDA data visualization that we did to better understand the users of the dataset
 - users.R --> This file is the preliminary mockup of our multi-option menu-based application without the user-specific recommendation algorithms
+- BX_Books.csv --> Stores all of the book information from the Book-Crossing dataset
+- BX-Users.csv --> Stores all of the user information from the Book-Crossing dataset
+- BX-Book-Ratings.csv --> Stores all of the rating information from the Book-Crossing dataset
